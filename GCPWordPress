@@ -1,0 +1,72 @@
+[200~Infrastructure Architecture POC document for WordPress site hosting on Google Cloud Platform. 
+ 
+ Introduction 
+ This POC is for startup company (ABC WordPress Website hosting on Google Cloud Platform. We will be using this document for POC what all components and services required to setup the POC for WordPress. I will be pointing out some components which are used here e.g. (App Engine, Cloud DNS, CDN ,Load Balancing, Auto Scaling) 
+  
+  Requirements for this POC 
+  POC architecture of WordPress on GCP that will scale to the usage patterns 
+  Documentation of your proposal 
+  The usage patterns:  
+  90% of customers live in San Francisco and Tokyo 
+  Current average hourly traffic is 1k active users 
+  Estimate adding 10k active users a month 
+  Social marketing on the 1st & 15th of the month bring in 1,000,000 users to the website over about 24 hours 
+  Wordpress web content is built once and then updated no more than twice a year 
+  There are no customer logins for Wordpress, it is just a static informational website 
+  Database queries are rare and DB usage is very low 
+  Cost is the least important factor 
+  Uptime and low complexity of infrastructure management is most important factor 
+  Cloud native & best practices GCP infrastructure is preferred 
+   
+   There are multiple options to deploy a WordPress website 
+   1. WordPress Single Instance using GCP Marketplace 
+   2. WordPress on Kubernetes Engine 
+   3. WordPress on App Engine 
+   For our use  POC, option 3 is more suitable because we expect huge peaks during 1st and 15th of every month because of marketing (require the service to scale). This option might be expensive but cost is not a concern as per the requirements. We are not going to use the other two option as it will require good amount of infrastructure management for K8S cluster. 
+   In order to configure instance AZs and caching for App engine need to use Cloud CDN content delivery networks. Also, we need the service to be hosted in asia-northeast1 (Tokyo) and us-west2 (LA) GC Regions there are 3 AZs in each zone. So better to opt to split servers across all 3 AZs such that the service would still be up even if one of the AZs is down. 
+    
+    Components used in this POC. 
+    Cloud DNS: 
+    When a user requests your website in the browser, their request ends up on your DNS provider, in this example, we are using Google DNS which is a highly available Domain Name service. 
+    The Network traffic is routed to infrastructure running on Google Cloud 
+    CDN (Content delivery Network): for  
+    Since most of the content is static and If the request is for content that is cached, it is delivered by CDN. In this architecture, we are using Cloud CDN, a global network of edge locations. Requests are automatically routed to the nearest edge location, so content is delivered with the best performance. 
+    Cloud Storage: 
+    Static content used by the web application is stored on Google Cloud Storage, which is a highly durable storage infrastructure designed for mission-critical and primary data storage. 
+    Load balancing: 
+    To Distribute the traffic among the multiple servers we use load balancer. If you use HTTPS, the SSL session is terminated at the load balancer and requires at least one signed SSL certificate. 
+    Autoscaling: 
+    The application’s resources can increase or decrease requires that it has a means by which we can add or remove instances from service 
+    Database is part of this GCE as use of DB is minimal no login info its not explicitly mentioned but can be used from GCE. 
+    ====================== 
+     
+     Procedure with steps: 
+     To begin, go to cloud.google.com  and create your personal account. Here, enter your address, name, and your credit card details. You can opt for the optional free trial. 
+     After that, open the GCP Console. Head over to https://console.cloud.google.com/start or click the Console button on the present page. 
+     Next, you need a Project. Click on the automatically generated “My First Project” tab. 
+     Next, go to the Marketplace, located on the left sidebar. 
+     On the next screen, there will be several apps that can be installed on the virtual machine that will be created. Here, search for WordPress using the search box, find it and select it 
+     Launch on Compute Engine (Database is part of this GCE as use of DB is minimal no login info its not explicitly mentioned ) 
+     Fill the fields in the deployment menu like name machine type, disk size, zone and select deploy. 
+     Access the VPC Network on the Dashboard, and select external IP addresses. 
+     The default selection under the Type column will be Ephemeral. Click on the drop-down menu and choose Static instead 
+     Click on APIs and services and select libraries. 
+     Enable cloud dns api 
+     find your WordPress instance and copy its External IP. 
+     go to Network services > Cloud DNS. Here, click CREATE ZONE  
+     Zone name – how you want to name the specific zone. 
+     DNS name – your registered domain name, without a prefix. 
+     Description – an optional description for the zone. 
+     for high availability use the 2 instances under the load balancing and to scale up depending on traffic use autoscaling policies (IN this case here you have to use asia-northeast1 (Tokyo) and us-west2 (LA) GC Regions ) 
+      
+       
+       ------------------------------------------------------------------ 
+        
+	Reference Links used for this POC  
+	https://cloud.google.com/wordpress#appengine  
+	https://cloud.google.com/compute/docs/regions-zones  
+	https://cloud.google.com/cdn/docs/overview  
+	https://online.visual-paradigm.com/ 
+	 
+	  
+	   
